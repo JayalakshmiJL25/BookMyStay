@@ -1,68 +1,138 @@
 import java.util.HashMap;
 import java.util.Map;
 
+/* Room Domain Model */
+
+abstract class Room {
+
+    private int beds;
+    private double price;
+
+    public Room(int beds, double price) {
+        this.beds = beds;
+        this.price = price;
+    }
+
+    public int getBeds() {
+        return beds;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public abstract String getRoomType();
+}
+
+
+class SingleRoom extends Room {
+
+    public SingleRoom() {
+        super(1, 100);
+    }
+
+    public String getRoomType() {
+        return "Single Room";
+    }
+}
+
+
+class DoubleRoom extends Room {
+
+    public DoubleRoom() {
+        super(2, 180);
+    }
+
+    public String getRoomType() {
+        return "Double Room";
+    }
+}
+
+
+class SuiteRoom extends Room {
+
+    public SuiteRoom() {
+        super(3, 350);
+    }
+
+    public String getRoomType() {
+        return "Suite Room";
+    }
+}
+
+
+/* Inventory Management (UC3) */
+
 class RoomInventory {
 
     private HashMap<String, Integer> inventory;
 
-    // Constructor initializes room availability
     public RoomInventory() {
+
         inventory = new HashMap<>();
 
         inventory.put("Single Room", 5);
         inventory.put("Double Room", 3);
-        inventory.put("Suite Room", 2);
+        inventory.put("Suite Room", 0); // Example unavailable room
     }
 
-    // Method to get availability
     public int getAvailability(String roomType) {
         return inventory.getOrDefault(roomType, 0);
     }
 
-    // Method to update availability
-    public void updateAvailability(String roomType, int newCount) {
-        inventory.put(roomType, newCount);
+    public Map<String, Integer> getInventory() {
+        return inventory;
     }
+}
 
-    // Display current inventory
-    public void displayInventory() {
-        System.out.println("----- Current Room Inventory -----");
 
-        for (Map.Entry<String, Integer> entry : inventory.entrySet()) {
-            System.out.println(entry.getKey() + " : " + entry.getValue());
+/* Search Service (UC4) */
+
+class SearchService {
+
+    public void searchAvailableRooms(RoomInventory inventory, Room[] rooms) {
+
+        System.out.println("------ Available Rooms ------");
+
+        for (Room room : rooms) {
+
+            int available = inventory.getAvailability(room.getRoomType());
+
+            if (available > 0) {
+
+                System.out.println("Room Type : " + room.getRoomType());
+                System.out.println("Beds      : " + room.getBeds());
+                System.out.println("Price     : $" + room.getPrice());
+                System.out.println("Available : " + available);
+                System.out.println();
+            }
         }
     }
 }
 
 
+/* Application Entry */
 
 public class BookMyStay {
 
     public static void main(String[] args) {
 
-        // UC1
         System.out.println("Welcome to Book My Stay!");
-        System.out.println("Application: Hotel Booking Management System");
-        System.out.println("Version: 1.0");
-
+        System.out.println("Hotel Booking Management System v1.0");
         System.out.println("----------------------------------");
 
-        // UC3: Initialize Inventory
+        // Initialize inventory
         RoomInventory inventory = new RoomInventory();
 
-        // Display current inventory
-        inventory.displayInventory();
+        // Room domain objects
+        Room[] rooms = {
+                new SingleRoom(),
+                new DoubleRoom(),
+                new SuiteRoom()
+        };
 
-        System.out.println("----------------------------------");
-
-        // Example availability lookup
-        System.out.println("Available Single Rooms: "
-                + inventory.getAvailability("Single Room"));
-
-        // Update availability example
-        inventory.updateAvailability("Single Room", 4);
-
-        System.out.println("Updated Single Room Availability: "
-                + inventory.getAvailability("Single Room"));
+        // Search operation
+        SearchService search = new SearchService();
+        search.searchAvailableRooms(inventory, rooms);
     }
 }
